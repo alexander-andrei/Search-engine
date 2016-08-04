@@ -1,12 +1,19 @@
 <?php
 
-error_reporting(0);
+namespace Logic;
 
-require('Splitter.php');
-require('Wikipedia.php');
-
+/**
+ * Class Search
+ *
+ * @package Logic
+ */
 class Search
 {
+    /**
+     * Search depth
+     */
+    const SEARCH_RESULT_DEPTH = 2;
+
     /**
      * @var Splitter
      */
@@ -17,7 +24,7 @@ class Search
      *
      * @param Splitter $splitter
      */
-    public function Search(Splitter $splitter)
+    public function __construct(Splitter $splitter)
     {
         $this->splitter = $splitter;
     }
@@ -35,9 +42,9 @@ class Search
     /**
      * Echoes search result
      *
-     * @param $words
+     * @param string $words
      */
-    private function echoSearchResult($words)
+    private function echoSearchResult(string $words)
     {
         $sentences = $this->splitSentence();
         $words = explode(" ", strtolower($words));
@@ -52,11 +59,12 @@ class Search
     /**
      * Returns best search solution
      *
-     * @param $sentences
-     * @param $words
+     * @param array $sentences
+     * @param array $words
+     *
      * @return array
      */
-    private function searchForBestSolution($sentences, $words) : array
+    private function searchForBestSolution(array $sentences,array $words) : array
     {
         $bestSolution =
             [
@@ -80,14 +88,14 @@ class Search
         }
 
         $sentencesToShow = [];
-        for ($x = 2; $x >= 1; $x--)
+        for ($x = self::SEARCH_RESULT_DEPTH; $x >= 1; $x--)
         {
             array_push($sentencesToShow, $sentences[$bestSolution["index"] - $x]);
         }
 
         array_push($sentencesToShow, $sentences[$bestSolution["index"]]);
 
-        for ($x = 1; $x <= 2; $x++)
+        for ($x = 1; $x <= self::SEARCH_RESULT_DEPTH; $x++)
         {
             array_push($sentencesToShow, $sentences[$bestSolution["index"] + $x]);
         }
@@ -113,11 +121,12 @@ class Search
     /**
      * Returns 1 or 0 if match is found
      *
-     * @param $word
-     * @param $txt
+     * @param string $word
+     * @param string $txt
+     *
      * @return int
      */
-    private function hasWord($word, $txt) : int
+    private function hasWord(string $word, string $txt) : int
     {
         $pattern = "/(?:^|[^a-zA-Z])" . preg_quote($word, '/') . "(?:$|[^a-zA-Z])/i";
 
@@ -125,14 +134,3 @@ class Search
     }
 }
 
-unset($argv[0]);
-$question = implode(" ", $argv);
-
-$searchSentence = "Fastest butterfly swim";
-
-$page = new Wikipedia();
-$html = $page->getPage($question);
-
-$splitter = new Splitter($html);
-$search = new Search($splitter);
-$search->start($searchSentence);

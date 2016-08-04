@@ -1,5 +1,12 @@
 <?php
 
+namespace Logic;
+
+/**
+ * Class Splitter
+ *
+ * @package Logic
+ */
 class Splitter
 {
     /**
@@ -25,7 +32,7 @@ class Splitter
      *
      * @param string $sentence
      */
-    public function Splitter(string $sentence)
+    public function __construct(string $sentence)
     {
         $this->sentence = $sentence;
 
@@ -93,7 +100,7 @@ class Splitter
      * @param array $array
      * @return array
      */
-    private function flatten(array $array) {
+    private function flatten(array $array) : array{
         $return = array();
 
         array_walk_recursive($array, function($a) use (&$return) { $return[] = $a; });

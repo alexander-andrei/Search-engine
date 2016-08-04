@@ -1,17 +1,51 @@
 <?php
 
+namespace Logic;
+
+use \stdClass;
+
+/**
+ * Class Wikipedia
+ *
+ * @package Logic
+ */
 class Wikipedia
 {
-    public function getPage($searchKey)
+    /**
+     * @var Parser
+     */
+    private $_parser;
+
+    /**
+     * Wikipedia constructor.
+     *
+     * @param Parser $parser
+     */
+    public function __construct(Parser $parser)
+    {
+        $this->_parser = $parser;
+    }
+
+    /**
+     * @param string $searchKey
+     *
+     * @return string
+     */
+    public function getPage(string $searchKey) : string
     {
         $title = $this->getTitle($searchKey);
         $pageURL = $this->getPageUrl($title);
-        $wikiPage = $this->getHtmlPage($pageURL);
+        $wikiPage = $this->_parser->getHtmlPage($pageURL);
 
         return $wikiPage;
     }
 
-    private function curlSearchPage($searchKey)
+    /**
+     * @param string $searchKey
+     *
+     * @return mixed
+     */
+    private function curlSearchPage(string $searchKey) : stdClass
     {
         $ch = curl_init();
 
@@ -30,14 +64,26 @@ class Wikipedia
         return json_decode($server_output);
     }
 
-    private function getTitle($searchKey)
+    /**
+     * @param string $searchKey
+     *
+     * @return mixed
+     */
+    private function getTitle(string $searchKey) : string
     {
         $wikiData = $this->curlSearchPage($searchKey);
 
         return reset($wikiData->query->search)->title;
     }
 
-    private function getPageUrl($title)
+    /**
+     * Get the url page for search
+     *
+     * @param string $title
+     *
+     * @return string
+     */
+    private function getPageUrl(string $title) : string
     {
         $splitTitle = explode(" ", $title);
 
@@ -53,19 +99,5 @@ class Wikipedia
         }
 
         return $pageURL;
-    }
-
-    private function getHtmlPage($url)
-    {
-        $doc = new DOMDocument();
-        $doc->loadHTMLFile($url);
-
-        $data = "";
-        foreach ($doc->getElementById("mw-content-text")->getElementsByTagName("p") as $item)
-        {
-            $data .= $item->textContent;
-        }
-
-        return $data;
     }
 }
